@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barrio Meiggs</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map {
+            width: 100%;
+            height: 97vh;
+        }
+        /* Ajustes para los menús de capas */
+        .leaflet-top.leaflet-right .leaflet-control-layers {
+            margin-bottom: 10px; /* Espacio entre los menús */
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        // Inicialización del mapa sin centrar
+        var map = L.map('map');
+
+        // Capas base
+        var OSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        });
+
+        // Control de capas base (Menu 1)
+        var baseMaps = {
+            "OSM": OSM,
+            "Google Hybrid": googleHybrid
+        };
+        var baseControl = L.control.layers(baseMaps).addTo(map);
+
+        // GeoJSON Layers y URLs
+        var geojsonUrls = {
+            //Ordenanza 94
+    'Carros Quioscos Anaqueles': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/1_Carros_quioscos_anaqueles_y_otros_semestral.geojson',
+    'Carros Venta Maní Mote': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/2_Carros_venta_de_mani_o_mote_con_huesillo_semestral.geojson',
+    'Quioscos Diarios Revistas': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/3_Quioscos_diarios_y_revistas_semestral.geojson',
+    'Quioscos Confites': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/4_Quioscos_de_confites_y_otros_semestral.geojson',
+    'Quioscos Flores': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/5_Quioscos_para_la_venta_de_flores_en_calles_o_pasajes_semestral.geojson',
+    'Otros Quioscos': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/6_Otros_quioscos_o_modulos_que_no_contempla_el_articulo_10.geojson',
+    'Postes Letreros': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/7_Postes_sustentadores_de_letreros.geojson',
+    'Postes Letreros 7.1': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/7_1_Postes_sustentadores_de_letreros.geojson',
+    'Postes Letreros 7.2': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/7_2_Postes_sustentadores_de_letreros.geojson',
+    'Toldos Techos Marquesinas': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/8_Toldos_techos_marquesinas_refugios_u_otros_similares_de_material_ligero_para_propaganda_semestral_por_m2.geojson',
+    'Tapas Escotilla': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/9_Tapas_de_escotilla_de_ingreso_a_subterraneo_monta_carga_por_m2.geojson',
+    'Ocupacion BNUP Oficina': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/10_Ocupacion_de_un_BNUP_para_instalar_oficina_de_venta_de_locales_departamentos_u_otros_trimestral_por_m2.geojson',
+    'Permiso Ocupación BNUP': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/11_Permiso_ocupacion_BNUP_derivado_del_cierre_de_pasajes.geojson',
+    'Food Trucks': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/12_Vehiculos_de_venta_de_alimentos_(Food_Trucks_y_similares)_instalacion_permanente_por_unidad_semestral.geojson',
+    'Nuevos Permisos': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/13_Otorgamiento_de_nuevos_permisos.geojson',
+        //PRC Meiggs
+    'Meiggs': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/ZONAS_PRC_MEIGGS.geojson',
+    'Altura Maxima Zonas con Incentivos' : 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Altura_Maxima_de_edificacion_en_zonas_con_incentivos.geojson',
+    'Coeficiente de construccion zonas con incentivos':'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Coeficiente_de_construccion_en_zonas_con_incentivos.geojson',
+    'Coeficiente de constructibilidad': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Coeficiente_de_constructibilidad.geojson',
+    'Condicionantes Propuestas' : 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Coeficientes_propuestas.geojson',
+    'Uso de suelo existente SII Barrio Meiggs' : 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Meiggs_uso_de_suelo_existente_SII.geojson',
+    'Zonas con incentivos de edificacion':'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/ZONAS_CON_INCENTIVOS_DE_EDIFICACION_MEIGGS.geojson',
+    'Alturas permitidas por predio':'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Alturas_permitidas_por_predio.geojson',
+    'Alturas maximas edificadas': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Alturas_Maximas_edificadas.geojson',
+    'Alturas existentes': 'https://raw.githubusercontent.com/mattijechu1/Meiggs2024/71b4ab60dc20e4c194e62c0c070d7abbbc147923/Alturas_Existentes.geojson',
+};
+
+        var geojsonLayers = {};
+
+        // Función de estilo personalizada para la capa de Permiso Ocupación BNUP
+        function styleFeature(feature) {
+    var sector = feature.properties.Sector;
+    var color;
+    switch (sector) {
+        case 'Sector I':
+            color = 'red';
+            break;
+        case 'Sector II':
+            color = 'orange';
+            break;
+        case 'Sector III':
+            color = 'green';
+            break;
+        default:
+            color = 'gray'; // Color por defecto si el sector no coincide
+    }
+    return {
+        color: color,
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.5
+    };
+}
+
+// Estilo para la cobertura "Condicionantes Propuestas"
+function getCondicionantesColor(properties) {
+    const colorTable = {
+        '6': '#FFFF00',
+        '12': '#FF00FF',
+    };
+    return colorTable[properties['Cantidad_d']] || '#000000'; // Color por defecto
+}
+
+// Estilo para la cobertura "Condicionantes Propuestas"
+function styleCondicionantesPropuestas(feature) {
+    return {
+        color: getCondicionantesColor(feature.properties),
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.5
+    };
+}
+
+// Estilo para la cobertura "Uso de suelo existente SII Barrio Meiggs"
+function getUsoSueloColor(properties) {
+    const colorTable = {
+        "Bienes comunes": "#1A1A1A",
+        "Bodega y Almacenaje": "#FF00FF",
+        "Comercio": "#0066FF",
+        "Culto": "#00FFFF",
+        "Deporte y Recreación": "#00FF00",
+        "Educación y Cultura": "#99FF99",
+        "Estacionamiento": "#CCCCCC",
+        "Habitacional": "#FFFF00",
+        "Hotel, Motel": "#FFD966",
+        "Industria": "#FF9900",
+        "Oficina": "#FF00FF",
+        "Otros no considerados": "#FF6633",
+        "Sin información": "#CCFF33",
+        "Sitio Eriazo": "#FF0000",
+        "Transporte y Telecomunicaciones": "#990000"
+    };
+    return colorTable[properties['TIPO_DE_US']] || '#000000'; // Color por defecto
+}
+
+// Estilo para la cobertura "Uso de suelo existente SII Barrio Meiggs"
+function styleUsoSueloSII(feature) {
+    return {
+        color: getUsoSueloColor(feature.properties),
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.5
+    };
+}
+
+// Función para generar contenido del popup con propiedades del GeoJSON
+function generatePopupContent(properties) {
+    let content = "<table>";
+    for (let key in properties) {
+        content += `<tr><th>${key}</th><td>${properties[key]}</td></tr>`;
+    }
+    content += "</table>";
+    return content;
+}
+
+// Función para obtener el valor de altura basado en la propiedad específica de cada GeoJSON
+function getHeightValue(feature, heightProperty) {
+    return feature.properties[heightProperty] || 0;
+}
+
+// Función para generar una paleta de colores en base a un valor de altura
+function getColor(value, min, max) {
+    // Escala lineal de colores de verde (menor altura) a rojo (mayor altura)
+    var ratio = (value - min) / (max - min);
+    var r = Math.floor(255 * ratio);
+    var g = Math.floor(255 * (1 - ratio));
+    return `rgb(${r},${g},0)`;
+}
+
+// Función general para cargar GeoJSON y añadirlo al mapa
+function addGeoJSONLayer(url, layerName, heightProperty = null, style = null, defaultOn = false) {
+    fetch(url)
+    .then(response => response.json())
+    .then(data => {
+        let layerOptions = {
+            onEachFeature: function (feature, layer) {
+                // Crear contenido del popup con las propiedades de la característica
+                var popupContent = generatePopupContent(feature.properties);
+                layer.bindPopup(popupContent);
+
+                // Comprobar la propiedad ZONA y aplicar color basado en su valor
+                if (feature.properties && feature.properties.ZONA) {
+                    var zona = feature.properties.ZONA.toLowerCase(); // Comparación insensible a mayúsculas
+                    var color;
+                    switch (zona) {
+                        case 'e6':
+                            color = 'lightgreen';
+                            break;
+                        case 'e':
+                            color = 'darkgreen';
+                            break;
+                        case 'b8':
+                            color = 'pink';
+                            break;
+                        case 'b':
+                            color = 'red';
+                            break;
+                        default:
+                            color = 'gray'; // Color por defecto para valores ZONA desconocidos
+                            console.warn(`Unknown Zona value encountered: ${zona}`);
+                    }
+                    layer.setStyle({ color: color, weight: 2, opacity: 1, fillOpacity: 0.5 });
+                } else if (heightProperty) {
+                    // Aplicar estilo basado en altura si se especifica la propiedad de altura
+                    let height = getHeightValue(feature, heightProperty);
+                    let heights = data.features.map(feature => getHeightValue(feature, heightProperty));
+                    let minHeight = Math.min(...heights);
+                    let maxHeight = Math.max(...heights);
+                    layer.setStyle({ color: getColor(height, minHeight, maxHeight), weight: 2 });
+                } else {
+                    // Aplicar estilo por defecto si no se encuentra la propiedad ZONA
+                    layer.setStyle({ weight: 2, opacity: 1, fillOpacity: 0.5 });
+                }
+            }
+        };
+
+        if (style) {
+            geojsonLayers[layerName] = L.geoJSON(data, { ...layerOptions, style: style });
+        } else {
+            geojsonLayers[layerName] = L.geoJSON(data, layerOptions);
+        }
+
+        if (defaultOn) {
+            geojsonLayers[layerName].addTo(map);
+        }
+
+        // Centrar el mapa en la capa 'Meiggs' por defecto (opcional)
+        if (layerName === 'Meiggs') {
+            map.fitBounds(geojsonLayers[layerName].getBounds());
+        }
+    })
+    .catch(error => console.error('Error al cargar el GeoJSON:', error));
+}
+
+// Añadir las capas GeoJSON
+// Ordenanza 94
+addGeoJSONLayer(geojsonUrls['Permiso Ocupación BNUP'], 'Permiso Ocupación BNUP', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Food Trucks'], 'Food Trucks', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Carros Quioscos Anaqueles'], 'Carros Quioscos Anaqueles', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Carros Venta Maní Mote'], 'Carros Venta Maní Mote', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Quioscos Diarios Revistas'], 'Quioscos Diarios Revistas', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Quioscos Confites'], 'Quioscos Confites', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Quioscos Flores'], 'Quioscos Flores', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Otros Quioscos'], 'Otros Quioscos', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Postes Letreros'], 'Postes Letreros', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Postes Letreros 7.1'], 'Postes Letreros 7.1', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Postes Letreros 7.2'], 'Postes Letreros 7.2', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Toldos Techos Marquesinas'], 'Toldos Techos Marquesinas', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Tapas Escotilla'], 'Tapas Escotilla', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Ocupacion BNUP Oficina'], 'Ocupacion BNUP Oficina', null, styleFeature);
+addGeoJSONLayer(geojsonUrls['Nuevos Permisos'], 'Nuevos Permisos', null, styleFeature);
+
+// PRC Meiggs
+addGeoJSONLayer(geojsonUrls['Meiggs'], 'Meiggs');
+addGeoJSONLayer(geojsonUrls['Coeficiente de constructibilidad'], 'Coeficiente de constructibilidad');
+addGeoJSONLayer(geojsonUrls['Condicionantes Propuestas'], 'Condicionantes Propuestas', null, styleCondicionantesPropuestas);
+addGeoJSONLayer(geojsonUrls['Uso de suelo existente SII Barrio Meiggs'], 'Uso de suelo existente SII Barrio Meiggs', null, styleUsoSueloSII);
+addGeoJSONLayer(geojsonUrls['Zonas con incentivos de edificacion'], 'Zonas con incentivos de edificacion');
+addGeoJSONLayer(geojsonUrls['Alturas permitidas por predio'], 'Alturas permitidas por predio', 'ALT_MAX_ED');
+addGeoJSONLayer(geojsonUrls['Altura Maxima Zonas con Incentivos'], 'Altura Maxima Zonas con Incentivos', 'ALTURA_CN_');
+addGeoJSONLayer(geojsonUrls['Coeficiente de construccion zonas con incentivos'], 'Coeficiente de construccion zonas con incentivos');
+addGeoJSONLayer(geojsonUrls['Alturas maximas edificadas'], 'Alturas maximas edificadas', 'Altura MT');
+addGeoJSONLayer(geojsonUrls['Alturas existentes'], 'Alturas existentes', 'Altura MT');
+
+// Esperar a que todas las capas se carguen y luego agregar los controles de capas
+setTimeout(function() {
+    // Menu 2: Capas PRC Meiggs
+    var prcMaps = {
+        "Zonas PRC Meiggs": geojsonLayers['Meiggs'],
+        "Coeficiente de constructibilidad": geojsonLayers['Coeficiente de constructibilidad'],
+        "Condicionantes Propuestas": geojsonLayers['Condicionantes Propuestas'],
+        "Uso de suelo existente SII Barrio Meiggs": geojsonLayers['Uso de suelo existente SII Barrio Meiggs'],
+        "Zonas con incentivos de edificacion": geojsonLayers['Zonas con incentivos de edificacion'],
+        "Alturas permitidas por predio": geojsonLayers['Alturas permitidas por predio'],
+        "Altura Maxima Zonas con Incentivos": geojsonLayers['Altura Maxima Zonas con Incentivos'],
+        "Coeficiente de construccion zonas con incentivos": geojsonLayers['Coeficiente de construccion zonas con incentivos'],
+        "Alturas maximas edificadas": geojsonLayers['Alturas maximas edificadas'],
+        "Alturas existentes": geojsonLayers['Alturas existentes']
+    };
+    var prcControl = L.control.layers(null, prcMaps, { position: 'topright' }).addTo(map);
+    geojsonLayers['Meiggs'].addTo(map);
+    // Menu 3: Capas Ordenanza 94
+    var ordenanzaMaps = {
+        "Permiso Ocupación BNUP": geojsonLayers['Permiso Ocupación BNUP'],
+        "Food Trucks": geojsonLayers['Food Trucks'],
+        "Carros Quioscos Anaqueles": geojsonLayers['Carros Quioscos Anaqueles'],
+        "Carros Venta Maní Mote": geojsonLayers['Carros Venta Maní Mote'],
+        "Quioscos Diarios Revistas": geojsonLayers['Quioscos Diarios Revistas'],
+        "Quioscos Confites": geojsonLayers['Quioscos Confites'],
+        "Quioscos Flores": geojsonLayers['Quioscos Flores'],
+        "Otros Quioscos no contemplados en el articulo 10": geojsonLayers['Otros Quioscos'],
+        "Postes Letreros": geojsonLayers['Postes Letreros'],
+        "Postes Letreros 7.1": geojsonLayers['Postes Letreros 7.1'],
+        "Postes Letreros 7.2": geojsonLayers['Postes Letreros 7.2'],
+        "Toldos Techos Marquesinas": geojsonLayers['Toldos Techos Marquesinas'],
+        "Tapas Escotilla": geojsonLayers['Tapas Escotilla'],
+        "Ocupacion BNUP Oficina": geojsonLayers['Ocupacion BNUP Oficina'],
+        "Nuevos Permisos": geojsonLayers['Nuevos Permisos']
+    };
+    var ordenanzaControl = L.control.layers(null, ordenanzaMaps, { position: 'topright' }).addTo(map);
+
+    // Mover los menús 2 y 3 debajo del menú 1
+    var baseContainer = baseControl.getContainer();
+    var prcContainer = prcControl.getContainer();
+    var ordenanzaContainer = ordenanzaControl.getContainer();
+
+    // Agregar el prcControl y ordenanzaControl debajo de baseControl
+    baseContainer.parentNode.appendChild(prcContainer);
+    baseContainer.parentNode.appendChild(ordenanzaContainer);
+}, 1000); // Esperar 1 segundo para asegurarse de que las capas se hayan cargado
+
+</script>
+</body>
+</html>
